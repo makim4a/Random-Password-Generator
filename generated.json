@@ -1,0 +1,52 @@
+    def generate_password(self):
+        # Проверка корректности ввода
+        length = self.length_var.get()
+        if length < 8 or length > 32:
+            messagebox.showerror("Ошибка", "Длина пароля должна быть от 8 до 32 символов!")
+            return
+        
+        # Проверяем, что хотя бы один тип символов выбран
+        if not (self.digits_var.get() or self.letters_var.get() or
+                self.special_var.get()):
+            messagebox.showerror("Ошибка", "Выберите хотя бы один тип символов!")
+            return
+        
+        # Формируем набор символов
+        chars = ""
+        if self.digits_var.get():
+            chars += string.digits
+        if self.letters_var.get():
+            chars += string.ascii_letters
+        if self.special_var.get():
+            chars += "!@#$%^&*"
+        
+        # Генерируем пароль
+        password = ''.join(random.choice(chars) for _ in range(length))
+        
+        # Сохраняем в историю
+        symbols_used = ""
+        if self.digits_var.get(): symbols_used += "Цифры "
+        if self.letters_var.get(): symbols_used += "Буквы "
+        if self.special_var.get(): symbols_used += "Спецсимволы"
+        
+        new_password = {
+            "id": len(self.password_history) + 1,
+            "password": password,
+            "length": length,
+            "symbols": symbols_used.strip(),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        self.password_history.append(new_password)
+        self.save_history()
+        
+        # Отображаем результат
+        self.password_var.set(password)
+        self.refresh_history()
+    
+    def copy_to_clipboard(self):
+        password = self.password_var.get()
+        if password:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(password)
+            messagebox.showinfo("Успех", "Пароль скопирован в буфер обмена!")
